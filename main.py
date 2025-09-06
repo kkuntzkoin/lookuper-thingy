@@ -1,9 +1,75 @@
+
 import tkinter as tk
 from tkinter import ttk, messagebox, scrolledtext
 import requests
 import json
 
-API_KEY = "_______________________________"
+API_KEY = "__________________________________"
+
+def format_person(person):
+    lines = []
+    fn = person.get("full_name") or (f'{person.get("first_name","")} {person.get("last_name","")}'.strip())
+    if fn: lines.append(f"Name: {fn}")
+    jt = person.get("job_title")
+    if jt: lines.append(f"Title: {jt}")
+    company = person.get("job_company_name")
+    if company: lines.append(f"Employer: {company}")
+    loc = person.get("location_name")
+    if loc: lines.append(f"Location: {loc}")
+
+    dob = person.get("birth_date") or person.get("date_of_birth")
+    if dob: lines.append(f"Date of Birth: {dob}")
+
+    age = person.get("age")
+    if age: lines.append(f"Age: {age}")
+
+    sex = person.get("sex") or person.get("gender")
+    if sex: lines.append(f"Sex: {sex}")
+
+    work_email = person.get("work_email")
+    if work_email: lines.append(f"Work Email: {work_email}")
+
+    personal_emails = person.get("personal_emails", [])
+    if personal_emails: lines.append(f"Personal Emails: {', '.join(personal_emails)}")
+
+    phones = person.get("phone_numbers", [])
+    if phones: lines.append(f"Current Phones: {', '.join(phones)}")
+
+    prev_phones = person.get("previous_phone_numbers", [])
+    if prev_phones: lines.append(f"Previous Phones: {', '.join(prev_phones)}")
+
+    addresses = person.get("street_addresses", [])
+    if addresses:
+        addr_lines = [a.get("display") for a in addresses if a.get("display")]
+        lines.append(f"Addresses: {', '.join(addr_lines)}")
+
+    prev_addresses = person.get("previous_addresses", [])
+    if prev_addresses:
+        addr_lines = [a.get("display") for a in prev_addresses if a.get("display")]
+        lines.append(f"Previous Addresses: {', '.join(addr_lines)}")
+
+    linkedin = person.get("linkedin_url")
+    if linkedin: lines.append(f"LinkedIn: {linkedin}")
+    github = person.get("github_url")
+    if github: lines.append(f"GitHub: {github}")
+    twitter = person.get("twitter_url")
+    if twitter: lines.append(f"Twitter: {twitter}")
+    facebook = person.get("facebook_url")
+    if facebook: lines.append(f"Facebook: {facebook}")
+
+    education = person.get("education", [])
+    if education: lines.append(f"Education: {education}")
+
+    work_history = person.get("work_experience", [])
+    if work_history: lines.append(f"Work History: {work_history}")
+
+    skills = person.get("skills", [])
+    if skills: lines.append(f"Skills: {', '.join(skills)}")
+
+    certifications = person.get("certifications", [])
+    if certifications: lines.append(f"Certifications: {', '.join(certifications)}")
+
+    return "\n".join(lines) + "\n" + ("-" * 48) + "\n"
 
 def employee_lookup():
     company = emp_company_var.get().strip()
@@ -15,8 +81,8 @@ def employee_lookup():
     domain = emp_domain_var.get().strip()
     linkedin = emp_linkedin_var.get().strip()
     size = emp_size_var.get().strip()
-    sex = emp_sex_var.get().strip().lower()  # <-- new
-    result_size = 30
+    sex = emp_sex_var.get().strip().lower()
+    result_size = 12
 
     must = []
     if company:
@@ -67,41 +133,7 @@ def employee_lookup():
             emp_output.insert(tk.END, "No employees found. Try a different search.")
             return
         for person in data:
-            lines = []
-            fn = person.get("full_name") or (f'{person.get("first_name","")} {person.get("last_name","")}'.strip())
-            if fn: lines.append(f"Name: {fn}")
-            jt = person.get("job_title")
-            if jt: lines.append(f"Title: {jt}")
-            company = person.get("job_company_name")
-            if company: lines.append(f"Employer: {company}")
-            loc = person.get("location_name")
-            if loc: lines.append(f"Location: {loc}")
-            email = person.get("work_email")
-            if email: lines.append(f"Work Email: {email}")
-            personal_emails = person.get("personal_emails", [])
-            if personal_emails: lines.append(f"Personal Emails: {', '.join(personal_emails)}")
-            phones = person.get("phone_numbers", [])
-            if phones: lines.append(f"Phones: {', '.join(phones)}")
-            linkedin = person.get("linkedin_url")
-            if linkedin: lines.append(f"LinkedIn: {linkedin}")
-            github = person.get("github_url")
-            if github: lines.append(f"GitHub: {github}")
-            twitter = person.get("twitter_url")
-            if twitter: lines.append(f"Twitter: {twitter}")
-            facebook = person.get("facebook_url")
-            if facebook: lines.append(f"Facebook: {facebook}")
-            sex = person.get("sex") or person.get("gender")
-            if sex: lines.append(f"Sex: {sex}")
-            education = person.get("education", [])
-            if education: lines.append(f"Education: {education}")
-            work_history = person.get("work_experience", [])
-            if work_history: lines.append(f"Work History: {work_history}")
-            skills = person.get("skills", [])
-            if skills: lines.append(f"Skills: {', '.join(skills)}")
-            certifications = person.get("certifications", [])
-            if certifications: lines.append(f"Certifications: {', '.join(certifications)}")
-            lines.append("-" * 48)
-            emp_output.insert(tk.END, "\n".join(lines) + "\n")
+            emp_output.insert(tk.END, format_person(person))
     except Exception as ex:
         messagebox.showerror("Error", str(ex))
 
@@ -149,41 +181,7 @@ def person_lookup():
             lookup_output.insert(tk.END, "No records found. Try a different search.")
             return
         for person in data:
-            lines = []
-            fn = person.get("full_name") or (f'{person.get("first_name","")} {person.get("last_name","")}'.strip())
-            if fn: lines.append(f"Name: {fn}")
-            jt = person.get("job_title")
-            if jt: lines.append(f"Title: {jt}")
-            company = person.get("job_company_name")
-            if company: lines.append(f"Employer: {company}")
-            loc = person.get("location_name")
-            if loc: lines.append(f"Location: {loc}")
-            email = person.get("work_email")
-            if email: lines.append(f"Work Email: {email}")
-            personal_emails = person.get("personal_emails", [])
-            if personal_emails: lines.append(f"Personal Emails: {', '.join(personal_emails)}")
-            phones = person.get("phone_numbers", [])
-            if phones: lines.append(f"Phones: {', '.join(phones)}")
-            linkedin = person.get("linkedin_url")
-            if linkedin: lines.append(f"LinkedIn: {linkedin}")
-            github = person.get("github_url")
-            if github: lines.append(f"GitHub: {github}")
-            twitter = person.get("twitter_url")
-            if twitter: lines.append(f"Twitter: {twitter}")
-            facebook = person.get("facebook_url")
-            if facebook: lines.append(f"Facebook: {facebook}")
-            sex = person.get("sex") or person.get("gender")
-            if sex: lines.append(f"Sex: {sex}")
-            education = person.get("education", [])
-            if education: lines.append(f"Education: {education}")
-            work_history = person.get("work_experience", [])
-            if work_history: lines.append(f"Work History: {work_history}")
-            skills = person.get("skills", [])
-            if skills: lines.append(f"Skills: {', '.join(skills)}")
-            certifications = person.get("certifications", [])
-            if certifications: lines.append(f"Certifications: {', '.join(certifications)}")
-            lines.append("-" * 48)
-            lookup_output.insert(tk.END, "\n".join(lines) + "\n")
+            lookup_output.insert(tk.END, format_person(person))
     except Exception as ex:
         messagebox.showerror("Error", str(ex))
 
@@ -216,43 +214,7 @@ def person_enrichment():
         enrich_output.delete(1.0, tk.END)
         if result.get("status") == 200 or result.get("data"):
             data = result.get("data", result)
-            lines = []
-            fn = data.get("full_name") or (f'{data.get("first_name","")} {data.get("last_name","")}'.strip())
-            if fn: lines.append(f"Name: {fn}")
-            jt = data.get("job_title")
-            if jt: lines.append(f"Title: {jt}")
-            company = data.get("job_company_name")
-            if company: lines.append(f"Employer: {company}")
-            loc = data.get("location_name")
-            if loc: lines.append(f"Location: {loc}")
-            email = data.get("work_email")
-            if email: lines.append(f"Work Email: {email}")
-            personal_emails = data.get("personal_emails", [])
-            if personal_emails: lines.append(f"Personal Emails: {', '.join(personal_emails)}")
-            phones = data.get("phone_numbers", [])
-            if phones: lines.append(f"Phones: {', '.join(phones)}")
-            linkedin = data.get("linkedin_url")
-            if linkedin: lines.append(f"LinkedIn: {linkedin}")
-            github = data.get("github_url")
-            if github: lines.append(f"GitHub: {github}")
-            twitter = data.get("twitter_url")
-            if twitter: lines.append(f"Twitter: {twitter}")
-            facebook = data.get("facebook_url")
-            if facebook: lines.append(f"Facebook: {facebook}")
-            sex = data.get("sex") or data.get("gender")
-            if sex: lines.append(f"Sex: {sex}")
-            education = data.get("education", [])
-            if education: lines.append(f"Education: {education}")
-            work_history = data.get("work_experience", [])
-            if work_history: lines.append(f"Work History: {work_history}")
-            skills = data.get("skills", [])
-            if skills: lines.append(f"Skills: {', '.join(skills)}")
-            certifications = data.get("certifications", [])
-            if certifications: lines.append(f"Certifications: {', '.join(certifications)}")
-            if not lines:
-                enrich_output.insert(tk.END, "No data found (try a different input)")
-            else:
-                enrich_output.insert(tk.END, "\n".join(lines))
+            enrich_output.insert(tk.END, format_person(data))
         else:
             err = result.get("error", {}).get("message") or "No record found"
             enrich_output.insert(tk.END, err)
@@ -314,7 +276,7 @@ def lookup_company():
 
 root = tk.Tk()
 root.title("PDL Lookup (PRO)")
-root.geometry("1100x780")
+root.geometry("1200x820")
 
 tabControl = ttk.Notebook(root)
 tab1 = ttk.Frame(tabControl)
@@ -326,7 +288,6 @@ tabControl.add(tab2, text='Person Lookup')
 tabControl.add(tab3, text='Person Enrichment')
 tabControl.add(tab4, text='Company Lookup')
 tabControl.pack(expand=1, fill="both")
-
 
 tk.Label(tab1, text="Company Name:").grid(row=0, column=0, sticky='w')
 emp_company_var = tk.StringVar()
@@ -369,9 +330,8 @@ emp_last_var = tk.StringVar()
 tk.Entry(tab1, textvariable=emp_last_var, width=18).grid(row=4, column=1, sticky='w')
 
 tk.Button(tab1, text="Search", command=employee_lookup, bg="#456", fg="white").grid(row=5, column=0, columnspan=4, pady=12)
-emp_output = scrolledtext.ScrolledText(tab1, wrap=tk.WORD, width=130, height=22, font=("Consolas", 11))
+emp_output = scrolledtext.ScrolledText(tab1, wrap=tk.WORD, width=135, height=22, font=("Consolas", 11))
 emp_output.grid(row=6, column=0, columnspan=4, padx=8, pady=8)
-
 
 tk.Label(tab2, text="First Name:").grid(row=0, column=0, sticky='w')
 lookup_first_var = tk.StringVar()
@@ -390,9 +350,8 @@ lookup_state_var = tk.StringVar()
 tk.Entry(tab2, textvariable=lookup_state_var, width=26).grid(row=3, column=1, sticky='w')
 
 tk.Button(tab2, text="Search", command=person_lookup, bg="#456", fg="white").grid(row=4, column=0, columnspan=2, pady=12)
-lookup_output = scrolledtext.ScrolledText(tab2, wrap=tk.WORD, width=110, height=22, font=("Consolas", 11))
+lookup_output = scrolledtext.ScrolledText(tab2, wrap=tk.WORD, width=135, height=22, font=("Consolas", 11))
 lookup_output.grid(row=5, column=0, columnspan=2, padx=8, pady=8)
-
 
 tk.Label(tab3, text="Email:").grid(row=0, column=0, sticky='w')
 enrich_email_var = tk.StringVar()
@@ -423,9 +382,8 @@ enrich_linkedin_var = tk.StringVar()
 tk.Entry(tab3, textvariable=enrich_linkedin_var, width=32).grid(row=6, column=1, sticky='w')
 
 tk.Button(tab3, text="Search", command=person_enrichment, bg="#456", fg="white").grid(row=7, column=0, columnspan=2, pady=12)
-enrich_output = scrolledtext.ScrolledText(tab3, wrap=tk.WORD, width=110, height=18, font=("Consolas", 11))
+enrich_output = scrolledtext.ScrolledText(tab3, wrap=tk.WORD, width=135, height=18, font=("Consolas", 11))
 enrich_output.grid(row=8, column=0, columnspan=2, padx=8, pady=8)
-
 
 tk.Label(tab4, text="Domain (website):").grid(row=0, column=0, sticky='w')
 company_domain_var = tk.StringVar()
@@ -440,7 +398,7 @@ company_name_var = tk.StringVar()
 tk.Entry(tab4, textvariable=company_name_var, width=30).grid(row=2, column=1, sticky='w')
 
 tk.Button(tab4, text="Search", command=lookup_company, bg="#456", fg="white").grid(row=3, column=0, columnspan=2, pady=12)
-company_output = scrolledtext.ScrolledText(tab4, wrap=tk.WORD, width=110, height=18, font=("Consolas", 11))
+company_output = scrolledtext.ScrolledText(tab4, wrap=tk.WORD, width=135, height=18, font=("Consolas", 11))
 company_output.grid(row=4, column=0, columnspan=2, padx=8, pady=8)
 
 root.mainloop()
