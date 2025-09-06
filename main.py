@@ -1,10 +1,9 @@
-
 import tkinter as tk
 from tkinter import ttk, messagebox, scrolledtext
 import requests
 import json
 
-API_KEY = "__________________________________"
+API_KEY = "_______________________________________________"
 
 def format_person(person):
     lines = []
@@ -19,34 +18,36 @@ def format_person(person):
 
     dob = person.get("birth_date") or person.get("date_of_birth")
     if dob: lines.append(f"Date of Birth: {dob}")
-
     age = person.get("age")
     if age: lines.append(f"Age: {age}")
-
     sex = person.get("sex") or person.get("gender")
     if sex: lines.append(f"Sex: {sex}")
 
+    lines.append("")
+
     work_email = person.get("work_email")
     if work_email: lines.append(f"Work Email: {work_email}")
-
     personal_emails = person.get("personal_emails", [])
     if personal_emails: lines.append(f"Personal Emails: {', '.join(personal_emails)}")
-
     phones = person.get("phone_numbers", [])
     if phones: lines.append(f"Current Phones: {', '.join(phones)}")
-
     prev_phones = person.get("previous_phone_numbers", [])
     if prev_phones: lines.append(f"Previous Phones: {', '.join(prev_phones)}")
+    lines.append("")
 
     addresses = person.get("street_addresses", [])
     if addresses:
-        addr_lines = [a.get("display") for a in addresses if a.get("display")]
-        lines.append(f"Addresses: {', '.join(addr_lines)}")
-
+        lines.append("Addresses:")
+        for addr in addresses:
+            s = addr.get("display") or f"{addr.get('street','')} {addr.get('city','')} {addr.get('region','')} {addr.get('postal_code','')}"
+            if s: lines.append(f"  - {s.strip()}")
     prev_addresses = person.get("previous_addresses", [])
     if prev_addresses:
-        addr_lines = [a.get("display") for a in prev_addresses if a.get("display")]
-        lines.append(f"Previous Addresses: {', '.join(addr_lines)}")
+        lines.append("Previous Addresses:")
+        for addr in prev_addresses:
+            s = addr.get("display") or f"{addr.get('street','')} {addr.get('city','')} {addr.get('region','')} {addr.get('postal_code','')}"
+            if s: lines.append(f"  - {s.strip()}")
+    lines.append("")
 
     linkedin = person.get("linkedin_url")
     if linkedin: lines.append(f"LinkedIn: {linkedin}")
@@ -56,20 +57,39 @@ def format_person(person):
     if twitter: lines.append(f"Twitter: {twitter}")
     facebook = person.get("facebook_url")
     if facebook: lines.append(f"Facebook: {facebook}")
+    lines.append("")
 
     education = person.get("education", [])
-    if education: lines.append(f"Education: {education}")
+    if education:
+        lines.append("Education:")
+        for e in education:
+            summary = []
+            if e.get("school_name"): summary.append(f"School: {e.get('school_name')}")
+            if e.get("degree"): summary.append(f"Degree: {e.get('degree')}")
+            if e.get("field_of_study"): summary.append(f"Field: {e.get('field_of_study')}")
+            if e.get("start_date") or e.get("end_date"):
+                summary.append(f"Years: {e.get('start_date','?')} - {e.get('end_date','?')}")
+            if summary: lines.append("  - " + ", ".join(summary))
+    lines.append("")
 
     work_history = person.get("work_experience", [])
-    if work_history: lines.append(f"Work History: {work_history}")
+    if work_history:
+        lines.append("Work History:")
+        for w in work_history:
+            summary = []
+            if w.get("company_name"): summary.append(f"Company: {w.get('company_name')}")
+            if w.get("title"): summary.append(f"Title: {w.get('title')}")
+            if w.get("start_date") or w.get("end_date"):
+                summary.append(f"Years: {w.get('start_date','?')} - {w.get('end_date','?')}")
+            if summary: lines.append("  - " + ", ".join(summary))
+    lines.append("")
 
     skills = person.get("skills", [])
     if skills: lines.append(f"Skills: {', '.join(skills)}")
-
     certifications = person.get("certifications", [])
     if certifications: lines.append(f"Certifications: {', '.join(certifications)}")
-
-    return "\n".join(lines) + "\n" + ("-" * 48) + "\n"
+    lines.append("-" * 48)
+    return "\n".join([l for l in lines if l.strip() != ""]) + "\n"
 
 def employee_lookup():
     company = emp_company_var.get().strip()
@@ -77,12 +97,13 @@ def employee_lookup():
     state = emp_state_var.get().strip()
     first = emp_first_var.get().strip()
     last = emp_last_var.get().strip()
+    job_title = emp_jobtitle_var.get().strip()
     industry = emp_industry_var.get().strip()
     domain = emp_domain_var.get().strip()
     linkedin = emp_linkedin_var.get().strip()
     size = emp_size_var.get().strip()
     sex = emp_sex_var.get().strip().lower()
-    result_size = 30
+    result_size = 12
 
     must = []
     if company:
@@ -95,6 +116,8 @@ def employee_lookup():
         must.append({"term": {"first_name": first}})
     if last:
         must.append({"term": {"last_name": last}})
+    if job_title:
+        must.append({"match": {"job_title": job_title}})
     if industry:
         must.append({"match": {"job_company_industry": industry}})
     if domain:
@@ -142,7 +165,7 @@ def person_lookup():
     last = lookup_last_var.get().strip()
     city = lookup_city_var.get().strip()
     state = lookup_state_var.get().strip()
-    size = 20
+    size = 12
 
     must = []
     if first:
@@ -276,7 +299,7 @@ def lookup_company():
 
 root = tk.Tk()
 root.title("PDL Lookup (PRO)")
-root.geometry("1200x820")
+root.geometry("1200x870")
 
 tabControl = ttk.Notebook(root)
 tab1 = ttk.Frame(tabControl)
@@ -329,9 +352,13 @@ tk.Label(tab1, text="Last Name:").grid(row=4, column=0, sticky='w')
 emp_last_var = tk.StringVar()
 tk.Entry(tab1, textvariable=emp_last_var, width=18).grid(row=4, column=1, sticky='w')
 
-tk.Button(tab1, text="Search", command=employee_lookup, bg="#456", fg="white").grid(row=5, column=0, columnspan=4, pady=12)
+tk.Label(tab1, text="Job Title:").grid(row=5, column=0, sticky='w')
+emp_jobtitle_var = tk.StringVar()
+tk.Entry(tab1, textvariable=emp_jobtitle_var, width=26).grid(row=5, column=1, sticky='w')
+
+tk.Button(tab1, text="Search", command=employee_lookup, bg="#456", fg="white").grid(row=6, column=0, columnspan=4, pady=12)
 emp_output = scrolledtext.ScrolledText(tab1, wrap=tk.WORD, width=135, height=22, font=("Consolas", 11))
-emp_output.grid(row=6, column=0, columnspan=4, padx=8, pady=8)
+emp_output.grid(row=7, column=0, columnspan=4, padx=8, pady=8)
 
 tk.Label(tab2, text="First Name:").grid(row=0, column=0, sticky='w')
 lookup_first_var = tk.StringVar()
