@@ -3,7 +3,7 @@ from tkinter import ttk, messagebox, scrolledtext
 import requests
 import json
 
-API_KEY = "4851e6c668036f7dfe893a2157115aa995df4109b852e3e9ae97270080976fda"
+API_KEY = "_______________________________"
 
 def employee_lookup():
     company = emp_company_var.get().strip()
