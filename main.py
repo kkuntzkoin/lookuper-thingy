@@ -82,7 +82,7 @@ def employee_lookup():
     linkedin = emp_linkedin_var.get().strip()
     size = emp_size_var.get().strip()
     sex = emp_sex_var.get().strip().lower()
-    result_size = 12
+    result_size = 30
 
     must = []
     if company:
@@ -142,7 +142,7 @@ def person_lookup():
     last = lookup_last_var.get().strip()
     city = lookup_city_var.get().strip()
     state = lookup_state_var.get().strip()
-    size = 12
+    size = 20
 
     must = []
     if first:
